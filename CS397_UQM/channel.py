@@ -136,18 +136,18 @@ old_tau = np.inf
 # Now we'll sample for up to max_n steps
 for sample in s.sample(params0, iterations=max_n, progress=True):
     # Only check convergence every 100 steps
-    if sampler.iteration % 100:
+    if s.iteration % 100:
         continue
 
     # Compute the autocorrelation time so far
     # Using tol=0 means that we'll always get an estimate even
     # if it isn't trustworthy
-    tau = sampler.get_autocorr_time(tol=0)
+    tau = s.get_autocorr_time(tol=0)
     autocorr[index] = np.mean(tau)
     index += 1
 
     # Check convergence
-    converged = np.all(tau * 100 < sampler.iteration)
+    converged = np.all(tau * 100 < s.iteration)
     converged &= np.all(np.abs(old_tau - tau) / tau < 0.01)
     if converged:
         break
