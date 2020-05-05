@@ -1,7 +1,6 @@
 #!/bin/py
 import numpy as np
 import matplotlib
-matplotlib.use('tkagg')
 from matplotlib import pyplot
 import pylab
 import matplotlib.mlab as mlab
@@ -30,7 +29,7 @@ fdict = {'prior_q': prior.prior_q,
          'prior_I0': prior.prior_I0}
 
 # -------------------------------------------------------------
-# subroutine that generates a .pdf file plotting a quantity
+# subroutine that generates a .png file plotting a quantity
 # -------------------------------------------------------------
 def plotter(chain,quant,xmin=None,xmax=None):
     from math import log, pi
@@ -69,7 +68,7 @@ class BayesianRichardsonExtrapolation(object):
     def __call__(self, params, dtype=np.double):
         q,beta,k,c1,c2,c3,deq,deqq,diq,delta,gamma,E0,I0 = params
 
-        from math import log
+        #from math import log
 
         return (
             prior.prior(q,beta,k,c1,c2,c3,deq,deqq,diq,delta,gamma,E0,I0) + 
@@ -114,8 +113,8 @@ backend.reset(nwalk, 13)
 
 print("\nInitializing the sampler and burning in walkers")
 s = EnsembleSampler(nwalk, params0.shape[-1], bre, backend=backend)
-pos, prob, state = s.run_mcmc(params0, 50000)
-s.reset()
+#pos, prob, state = s.run_mcmc(params0, 1000, progress=True)
+#s.reset()
 print("\nSampling the posterior density for the problem")
 #s.run_mcmc(pos, 20000, progress=True)
 #print("Mean acceptance fraction: {0:.3f}".format(np.mean(s.acceptance_fraction)))
@@ -134,9 +133,9 @@ autocorr = np.empty(max_n)
 old_tau = np.inf
 
 # Now we'll sample for up to max_n steps
-for sample in s.sample(pos, iterations=max_n, progress=True):
-    # Only check convergence every 100 steps
-    if s.iteration % 1000:
+for sample in s.sample(params0, iterations=max_n, progress=True):
+    # Only check convergence every 10000 steps
+    if s.iteration % 10000:
         continue
 
     # Compute the autocorrelation time so far
