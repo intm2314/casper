@@ -111,7 +111,8 @@ s.reset()
 
 print("\nSampling the posterior density for the problem")
 s.run_mcmc(pos, 20000)
-print("Mean acceptance fraction was %.3f" % s.acceptance_fraction.mean())
+print("Mean acceptance fraction: {0:.3f}".format(np.mean(s.acceptance_fraction)))
+print("Mean autocorrelation time: {0:.3f} steps".format(np.mean(s.get_autocorr_time())))
 
 #
 # 1d Marginals
