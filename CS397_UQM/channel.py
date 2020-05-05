@@ -134,6 +134,7 @@ autocorr = np.empty(max_n)
 old_tau = np.inf
 
 # Now we'll sample for up to max_n steps
+from emcee import sampler
 for sample in sampler.sample(params0, iterations=max_n, progress=True):
     # Only check convergence every 100 steps
     if sampler.iteration % 100:
