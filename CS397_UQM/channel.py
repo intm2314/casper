@@ -106,8 +106,9 @@ params0 = np.absolute(params0)       # ...and force >= 0
 
 # Set up the backend
 # Don't forget to clear it in case the file already exists
+from emcee import backends
 filename = "backend.h5"
-backend = emcee.backends.HDFBackend(filename)
+backend = backends.HDFBackend(filename)
 backend.reset(nwalkers, ndim)
 
 
