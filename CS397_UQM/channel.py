@@ -8,6 +8,7 @@ import matplotlib.mlab as mlab
 import matplotlib.ticker as ticker
 from scipy import stats
 import sys
+import h5py
 
 # local files that will be imported
 import prior
@@ -103,16 +104,65 @@ params0.T[11] += np.random.rand(nwalk) * 500 # Perturb E0
 params0.T[12] += np.random.rand(nwalk) * 100 # Perturb I0
 params0 = np.absolute(params0)       # ...and force >= 0
 
+# Set up the backend
+# Don't forget to clear it in case the file already exists
+filename = "backend.h5"
+backend = emcee.backends.HDFBackend(filename)
+backend.reset(nwalkers, ndim)
+
 
 print("\nInitializing the sampler and burning in walkers")
-s = EnsembleSampler(nwalk, params0.shape[-1], bre, threads=4)
-pos, prob, state = s.run_mcmc(params0, 10000)
-s.reset()
+s = EnsembleSampler(nwalk, params0.shape[-1], bre, backend=backend)
+#pos, prob, state = s.run_mcmc(params0, 10000, progress=True)
+#s.reset()
+#print("\nSampling the posterior density for the problem")
+#s.run_mcmc(pos, 20000, progress=True)
+#print("Mean acceptance fraction: {0:.3f}".format(np.mean(s.acceptance_fraction)))
+#print("Mean autocorrelation time: {0:.3f} steps".format(np.mean(s.get_autocorr_time())))
 
-print("\nSampling the posterior density for the problem")
-s.run_mcmc(pos, 20000)
-print("Mean acceptance fraction: {0:.3f}".format(np.mean(s.acceptance_fraction)))
-print("Mean autocorrelation time: {0:.3f} steps".format(np.mean(s.get_autocorr_time())))
+#
+#convergence-based MCMC
+#
+max_n = 100000
+
+# We'll track how the average autocorrelation time estimate changes
+index = 0
+autocorr = np.empty(max_n)
+
+# This will be useful to testing convergence
+old_tau = np.inf
+
+# Now we'll sample for up to max_n steps
+for sample in sampler.sample(params0, iterations=max_n, progress=True):
+    # Only check convergence every 100 steps
+    if sampler.iteration % 100:
+        continue
+
+    # Compute the autocorrelation time so far
+    # Using tol=0 means that we'll always get an estimate even
+    # if it isn't trustworthy
+    tau = sampler.get_autocorr_time(tol=0)
+    autocorr[index] = np.mean(tau)
+    index += 1
+
+    # Check convergence
+    converged = np.all(tau * 100 < sampler.iteration)
+    converged &= np.all(np.abs(old_tau - tau) / tau < 0.01)
+    if converged:
+        break
+    old_tau = tau
+#
+# graphical convergence check
+#
+n = 100 * np.arange(1, index + 1)
+y = autocorr[:index]
+pyplot.plot(n, n / 100.0, "--k")
+pyplot.plot(n, y)
+pyplot.xlim(0, n.max())
+pyplot.ylim(0, y.max() + 0.1 * (y.max() - y.min()))
+pyplot.xlabel("number of steps")
+pyplot.ylabel(r"mean $\hat{\tau}$")
+pyplot.savefig('convergence.png', bbox_inches='tight')
 
 #
 # 1d Marginals
