@@ -123,7 +123,7 @@ print("\nSampling the posterior density for the problem")
 #
 #convergence-based MCMC
 #
-max_n = 100000
+max_n = 1000000
 
 # We'll track how the average autocorrelation time estimate changes
 index = 0
@@ -154,7 +154,7 @@ for sample in s.sample(params0, iterations=max_n, progress=True):
 #
 # graphical convergence check
 #
-n = 100 * np.arange(1, index + 1)
+n = 10000 * np.arange(1, index + 1)
 y = autocorr[:index]
 pyplot.plot(n, n / 100.0, "--k")
 pyplot.plot(n, y)
