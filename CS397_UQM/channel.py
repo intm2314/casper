@@ -109,7 +109,7 @@ params0 = np.absolute(params0)       # ...and force >= 0
 from emcee import backends
 filename = "backend.h5"
 backend = backends.HDFBackend(filename)
-backend.reset(nwalkers, ndim)
+backend.reset(nwalk, 13)
 
 
 print("\nInitializing the sampler and burning in walkers")
